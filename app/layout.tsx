@@ -4,7 +4,7 @@ import Navbar from '@/components/Navbar';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'ਕਾਵਿ-ਸੰਗ੍ਰਹਿ — Punjabi Poetry & Songs',
+  title: 'Ray of Hope — Punjabi Poetry & Songs',
   description: 'A curated collection of Punjabi shayari, poems, and songs in Gurmukhi script.',
 };
 
@@ -31,7 +31,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Navbar />
           <main className="min-h-screen">{children}</main>
           <footer className="border-t py-8 mt-12 text-center text-sm" style={{ borderColor: 'var(--border)', color: 'var(--muted-fg)' }}>
-            <p className="gurmukhi text-base">ਕਾਵਿ-ਸੰਗ੍ਰਹਿ</p>
+            <p className="font-bold text-base">Ray of Hope</p>
             <p className="mt-1">Punjabi Poetry & Songs Collection</p>
           </footer>
         </ThemeProvider>

@@ -29,10 +29,10 @@ export default function Navbar() {
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 font-bold">
           <BookOpen className="w-5 h-5" style={{ color: 'var(--primary)' }} />
-          <span className="gurmukhi text-base font-semibold hidden sm:block" style={{ color: 'var(--primary)' }}>
-            ਕਾਵਿ-ਸੰਗ੍ਰਹਿ
+          <span className="text-base font-bold hidden sm:block" style={{ color: 'var(--primary)' }}>
+            Ray of Hope
           </span>
-          <span className="text-sm font-semibold sm:hidden" style={{ color: 'var(--primary)' }}>Poetry</span>
+          <span className="text-sm font-bold sm:hidden" style={{ color: 'var(--primary)' }}>Ray of Hope</span>
         </Link>
 
         {/* Desktop nav */}

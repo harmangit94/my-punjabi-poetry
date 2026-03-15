@@ -24,6 +24,16 @@ export async function deleteEntry(id: string) {
   if (rows[0]) revalidatePath(`/${rows[0].category}`);
 }
 
+export async function updateEntry(id: string, data: { title: string; content: string; category: Category; author: string }) {
+  await sql`
+    UPDATE entries
+    SET title = ${data.title}, content = ${data.content}, category = ${data.category}, author = ${data.author}
+    WHERE id = ${id}
+  `;
+  revalidatePath('/');
+  revalidatePath(`/${data.category}`);
+}
+
 export async function bulkInsert(rows: { title: string; content: string; category: Category; author: string }[]) {
   for (const row of rows) {
     await sql`

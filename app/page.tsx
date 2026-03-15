@@ -1,10 +1,9 @@
 import { sql } from '@/lib/db';
-import { CATEGORIES, type Entry } from '@/lib/supabase';
+import { type Entry } from '@/lib/supabase';
 import { getSpotlightEntry } from '@/lib/spotlight';
 import SpotlightCard from '@/components/SpotlightCard';
-import EntryCard from '@/components/EntryCard';
+import CategoryBrowser from '@/components/CategoryBrowser';
 import Link from 'next/link';
-import { ArrowRight } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,18 +11,15 @@ export default async function HomePage() {
   const entries = (await sql`SELECT * FROM entries ORDER BY created_at DESC`) as Entry[];
   const spotlight = getSpotlightEntry(entries);
 
-  const byCategory = CATEGORIES.map((cat) => ({
-    ...cat,
-    entries: entries.filter((e) => e.category === cat.value).slice(0, 4),
-  }));
-
   return (
-    <div className="max-w-6xl mx-auto px-4 py-10 space-y-14">
+    <div className="max-w-6xl mx-auto px-4 py-10 space-y-12">
+      {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="gurmukhi text-2xl font-bold">ਕਾਵਿ-ਸੰਗ੍ਰਹਿ</h1>
+        <h1 className="text-2xl font-bold">Ray of Hope</h1>
         <span className="text-sm" style={{ color: 'var(--muted-fg)' }}>{entries.length} entries</span>
       </div>
 
+      {/* Spotlight */}
       <section>
         {spotlight ? (
           <SpotlightCard entry={spotlight} />
@@ -35,25 +31,11 @@ export default async function HomePage() {
         )}
       </section>
 
-      {byCategory.map((cat, ci) =>
-        cat.entries.length > 0 ? (
-          <section key={cat.value}>
-            <div className="flex items-center justify-between mb-5">
-              <div className="flex items-baseline gap-3">
-                <h2 className="text-xl font-bold">{cat.label}</h2>
-                <span className="gurmukhi text-sm" style={{ color: 'var(--muted-fg)' }}>{cat.labelPunjabi}</span>
-              </div>
-              <Link href={`/${cat.value}`} className="flex items-center gap-1 text-sm font-medium hover:underline" style={{ color: 'var(--primary)' }}>
-                View all <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {cat.entries.map((entry, i) => (
-                <EntryCard key={entry.id} entry={entry} delay={ci * 60 + i * 80} />
-              ))}
-            </div>
-          </section>
-        ) : null
+      {/* All categories carousel browser */}
+      {entries.length > 0 && (
+        <section>
+          <CategoryBrowser allEntries={entries} initialCategory="shayar" />
+        </section>
       )}
 
       {entries.length === 0 && (

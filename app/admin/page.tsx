@@ -3,9 +3,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Papa from 'papaparse';
-import { Loader2, Plus, Upload, Trash2, LogOut, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Loader2, Plus, Upload, Trash2, LogOut, CheckCircle2, AlertCircle, Pencil, X } from 'lucide-react';
 import { CATEGORIES, type Category, type Entry } from '@/lib/supabase';
-import { getEntries, addEntry, deleteEntry, bulkInsert } from './actions';
+import { getEntries, addEntry, updateEntry, deleteEntry, bulkInsert } from './actions';
 
 type Toast = { type: 'success' | 'error'; msg: string };
 
@@ -20,6 +20,9 @@ export default function AdminPage() {
   const [saving, setSaving]     = useState(false);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [toast, setToast]       = useState<Toast | null>(null);
+  const [editEntry, setEditEntry] = useState<Entry | null>(null);
+  const [editForm, setEditForm]   = useState(BLANK);
+  const [updating, setUpdating]   = useState(false);
 
   const [importRows, setImportRows]     = useState<Omit<Entry, 'id' | 'created_at'>[]>([]);
   const [importing, setImporting]       = useState(false);
@@ -49,6 +52,24 @@ export default function AdminPage() {
       showToast('error', 'Failed to save entry');
     }
     setSaving(false);
+  }
+
+  function openEdit(entry: Entry) {
+    setEditEntry(entry);
+    setEditForm({ title: entry.title, content: entry.content, category: entry.category, author: entry.author });
+  }
+
+  async function handleUpdate(e: React.FormEvent) {
+    e.preventDefault();
+    if (!editEntry) return;
+    setUpdating(true);
+    try {
+      await updateEntry(editEntry.id, editForm);
+      showToast('success', 'Entry updated!');
+      setEditEntry(null);
+      load();
+    } catch { showToast('error', 'Failed to update entry'); }
+    setUpdating(false);
   }
 
   async function handleDelete(id: string) {
@@ -254,16 +275,76 @@ export default function AdminPage() {
                     {entry.category} · {entry.author} · {new Date(entry.created_at).toLocaleDateString()}
                   </p>
                 </div>
-                <button onClick={() => handleDelete(entry.id)} disabled={deleting === entry.id}
-                  className="shrink-0 p-2 rounded-lg hover:opacity-70 transition-opacity disabled:opacity-40"
-                  style={{ color: '#ef4444' }}>
-                  {deleting === entry.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
-                </button>
+                <div className="flex items-center gap-1 shrink-0">
+                  <button onClick={() => openEdit(entry)}
+                    className="p-2 rounded-lg hover:opacity-70 transition-opacity"
+                    style={{ color: 'var(--primary)' }}>
+                    <Pencil className="w-4 h-4" />
+                  </button>
+                  <button onClick={() => handleDelete(entry.id)} disabled={deleting === entry.id}
+                    className="p-2 rounded-lg hover:opacity-70 transition-opacity disabled:opacity-40"
+                    style={{ color: '#ef4444' }}>
+                    {deleting === entry.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                  </button>
+                </div>
               </div>
             ))}
           </div>
         )}
       </section>
+      {/* Edit Modal */}
+      {editEntry && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <div className="w-full max-w-lg rounded-2xl border shadow-2xl" style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}>
+            <div className="flex items-center justify-between px-6 py-4 border-b" style={{ borderColor: 'var(--border)' }}>
+              <h2 className="font-semibold text-lg">Edit Entry</h2>
+              <button onClick={() => setEditEntry(null)} className="p-1.5 rounded-lg hover:opacity-70" style={{ color: 'var(--muted-fg)' }}>
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <form onSubmit={handleUpdate} className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1.5">Title (Gurmukhi)</label>
+                <input value={editForm.title} onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                  className="w-full px-3 py-2.5 rounded-xl border text-sm gurmukhi outline-none"
+                  style={{ backgroundColor: 'var(--muted)', borderColor: 'var(--border)', color: 'var(--foreground)' }} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1.5">Author</label>
+                <input value={editForm.author} onChange={(e) => setEditForm({ ...editForm, author: e.target.value })}
+                  className="w-full px-3 py-2.5 rounded-xl border text-sm outline-none"
+                  style={{ backgroundColor: 'var(--muted)', borderColor: 'var(--border)', color: 'var(--foreground)' }} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1.5">Category</label>
+                <select value={editForm.category} onChange={(e) => setEditForm({ ...editForm, category: e.target.value as Category })}
+                  className="w-full px-3 py-2.5 rounded-xl border text-sm outline-none"
+                  style={{ backgroundColor: 'var(--muted)', borderColor: 'var(--border)', color: 'var(--foreground)' }}>
+                  {CATEGORIES.map((c) => <option key={c.value} value={c.value}>{c.label} — {c.labelPunjabi}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1.5">Content (Gurmukhi)</label>
+                <textarea value={editForm.content} onChange={(e) => setEditForm({ ...editForm, content: e.target.value })}
+                  rows={8} className="w-full px-3 py-2.5 rounded-xl border text-sm gurmukhi outline-none resize-y"
+                  style={{ backgroundColor: 'var(--muted)', borderColor: 'var(--border)', color: 'var(--foreground)' }} />
+              </div>
+              <div className="flex gap-3 pt-1">
+                <button type="button" onClick={() => setEditEntry(null)}
+                  className="flex-1 py-2.5 rounded-xl text-sm font-semibold border"
+                  style={{ borderColor: 'var(--border)', color: 'var(--muted-fg)' }}>
+                  Cancel
+                </button>
+                <button type="submit" disabled={updating}
+                  className="flex-1 py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-60"
+                  style={{ backgroundColor: 'var(--primary)', color: 'var(--primary-fg)' }}>
+                  {updating && <Loader2 className="w-4 h-4 animate-spin" />} Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
