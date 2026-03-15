@@ -1,26 +1,54 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Gurmukhi:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #0f0f0f;
+  --muted: #f4f4f5;
+  --muted-fg: #71717a;
+  --border: #e4e4e7;
+  --card: #ffffff;
+  --primary: #7c3aed;
+  --primary-fg: #ffffff;
+  --accent: #f3f0ff;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+.dark {
+  --background: #09090b;
+  --foreground: #fafafa;
+  --muted: #18181b;
+  --muted-fg: #a1a1aa;
+  --border: #27272a;
+  --card: #18181b;
+  --primary: #a78bfa;
+  --primary-fg: #09090b;
+  --accent: #1e1b2e;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+* { box-sizing: border-box; }
 
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Inter', sans-serif;
+  transition: background-color 0.2s, color 0.2s;
+  -webkit-font-smoothing: antialiased;
 }
+
+/* Gurmukhi — generous line-height for readability */
+.gurmukhi {
+  font-family: 'Noto Sans Gurmukhi', 'Raavi', 'Arial Unicode MS', sans-serif;
+  line-height: 1.9;
+  letter-spacing: 0.01em;
+}
+.gurmukhi-lg {
+  font-family: 'Noto Sans Gurmukhi', 'Raavi', 'Arial Unicode MS', sans-serif;
+  line-height: 2.1;
+  letter-spacing: 0.02em;
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-up { animation: fade-up 0.45s ease both; }
