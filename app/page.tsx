@@ -1,19 +1,15 @@
-import { supabase, CATEGORIES } from '@/lib/supabase';
+import { sql } from '@/lib/db';
+import { CATEGORIES, type Entry } from '@/lib/supabase';
 import { getSpotlightEntry } from '@/lib/spotlight';
 import SpotlightCard from '@/components/SpotlightCard';
 import EntryCard from '@/components/EntryCard';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 
-export const revalidate = 3600;
-
-async function getEntries() {
-  const { data } = await supabase.from('entries').select('*').order('created_at', { ascending: false });
-  return data ?? [];
-}
+export const dynamic = 'force-dynamic';
 
 export default async function HomePage() {
-  const entries = await getEntries();
+  const entries = (await sql`SELECT * FROM entries ORDER BY created_at DESC`) as Entry[];
   const spotlight = getSpotlightEntry(entries);
 
   const byCategory = CATEGORIES.map((cat) => ({
@@ -23,13 +19,11 @@ export default async function HomePage() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-10 space-y-14">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="gurmukhi text-2xl font-bold">ਕਾਵਿ-ਸੰਗ੍ਰਹਿ</h1>
         <span className="text-sm" style={{ color: 'var(--muted-fg)' }}>{entries.length} entries</span>
       </div>
 
-      {/* Spotlight */}
       <section>
         {spotlight ? (
           <SpotlightCard entry={spotlight} />
@@ -41,7 +35,6 @@ export default async function HomePage() {
         )}
       </section>
 
-      {/* Category grids */}
       {byCategory.map((cat, ci) =>
         cat.entries.length > 0 ? (
           <section key={cat.value}>

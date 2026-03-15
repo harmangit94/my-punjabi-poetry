@@ -1,13 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import { BookOpen, Loader2 } from 'lucide-react';
 
 export default function AuthPage() {
   const router = useRouter();
-  const [email, setEmail]       = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading]   = useState(false);
   const [error, setError]       = useState('');
@@ -16,16 +14,19 @@ export default function AuthPage() {
     e.preventDefault();
     setLoading(true);
     setError('');
-    const { error: err } = await supabase.auth.signInWithPassword({ email, password });
+    const res = await fetch('/api/auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password }),
+    });
     setLoading(false);
-    if (err) { setError(err.message); return; }
+    if (!res.ok) { setError('Invalid password'); return; }
     router.push('/admin');
   }
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
-        {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl mb-4" style={{ backgroundColor: 'var(--accent)' }}>
             <BookOpen className="w-6 h-6" style={{ color: 'var(--primary)' }} />
@@ -36,27 +37,16 @@ export default function AuthPage() {
 
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-1.5">Email</label>
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3 py-2.5 rounded-xl border text-sm outline-none transition-colors focus:ring-2"
-              style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
-              placeholder="admin@example.com"
-            />
-          </div>
-          <div>
             <label className="block text-sm font-medium mb-1.5">Password</label>
             <input
               type="password"
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-2.5 rounded-xl border text-sm outline-none transition-colors focus:ring-2"
+              className="w-full px-3 py-2.5 rounded-xl border text-sm outline-none"
               style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
               placeholder="••••••••"
+              autoFocus
             />
           </div>
 
@@ -67,7 +57,7 @@ export default function AuthPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-opacity disabled:opacity-60"
+            className="w-full py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-60"
             style={{ backgroundColor: 'var(--primary)', color: 'var(--primary-fg)' }}
           >
             {loading && <Loader2 className="w-4 h-4 animate-spin" />}

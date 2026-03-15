@@ -1,9 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
-
-const url  = process.env.NEXT_PUBLIC_SUPABASE_URL  ?? 'https://placeholder.supabase.co';
-const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? 'placeholder';
-
-export const supabase = createClient(url, anon);
+// Types and constants only — DB client is in lib/db.ts
 
 export type Category = 'shayar' | 'short' | 'poem' | 'song';
 
